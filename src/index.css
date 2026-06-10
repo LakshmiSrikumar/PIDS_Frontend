@@ -138,3 +138,14 @@ body {
 .hover-highlight:focus-within .material-symbols-outlined {
   color: #adc6ff;
 }
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #424754;
+  border-radius: 10px;
+}

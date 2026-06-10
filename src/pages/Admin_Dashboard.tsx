@@ -3,10 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { logoutUser } from '../api/auth';
 import { useAuth } from '../context/AuthContext';
 import mapImage from '../assets/map.jpg';
+import UserManagement from './UserManagement';
 
 const MAP_PRIMARY = mapImage;
-const STITCH_MAP_FALLBACK =
-  'https://lh3.googleusercontent.com/aida/AP1WRLs06AwRinWHTTxGydyxBTC0YaD41amfriTFX-UsKbEbTjnifsW55Pkq9RkvWMJBefcl4OlBMGAq08DM0xXqBx-4n9BKB4_8A1zXCpdgbG-UVyiWEBJtKxQxQJR4534G6XzidGhEfOlLNujZuvUhzQF-r0qJq0zRD_0DxXzQg0bkCDfenkgUT5jOJ1gcNgJwTHbA__WA9iEeatNd25cAFiQvXjzHsAqvs0eYH2v7qhlFFKEbEMvegLtZqNo';
+// const STITCH_MAP_FALLBACK =
+//   'https://lh3.googleusercontent.com/aida/AP1WRLs06AwRinWHTTxGydyxBTC0YaD41amfriTFX-UsKbEbTjnifsW55Pkq9RkvWMJBefcl4OlBMGAq08DM0xXqBx-4n9BKB4_8A1zXCpdgbG-UVyiWEBJtKxQxQJR4534G6XzidGhEfOlLNujZuvUhzQF-r0qJq0zRD_0DxXzQg0bkCDfenkgUT5jOJ1gcNgJwTHbA__WA9iEeatNd25cAFiQvXjzHsAqvs0eYH2v7qhlFFKEbEMvegLtZqNo';
 
 const NAV = [
   { id: 'home', label: 'Home', icon: 'dashboard' },
@@ -19,7 +20,7 @@ export default function Admin_Dashboard() {
   const navigate = useNavigate();
   const { clearAuth, role } = useAuth();
   const [activeNav, setActiveNav] = useState<string>('home');
-  const [mapSrc, setMapSrc] = useState<string>(MAP_PRIMARY);
+  const [mapSrc] = useState<string>(MAP_PRIMARY);  //, setMapSrc
 
   // admin-only guard (defense in depth — route already protected)
   useEffect(() => {
@@ -36,9 +37,9 @@ export default function Admin_Dashboard() {
     navigate('/');
   };
 
-  const handleImgError = () => {
-    if (mapSrc !== STITCH_MAP_FALLBACK) setMapSrc(STITCH_MAP_FALLBACK);
-  };
+  // const handleImgError = () => {
+  //   if (mapSrc !== STITCH_MAP_FALLBACK) setMapSrc(STITCH_MAP_FALLBACK);
+  // };
 
   return (
     <div className="bg-background text-on-surface font-body-md text-body-md selection:bg-secondary/30 min-h-screen">
@@ -101,51 +102,54 @@ export default function Admin_Dashboard() {
         </div>
       </aside>
 
-      {/* ── Main Canvas (Map) ── */}
-      <main className="fixed inset-0 w-full h-full overflow-hidden pl-16">
-        <div className="relative w-full h-full bg-[#060e20]">
-          {/* Map container */}
-          <div className="absolute inset-0 z-0 overflow-hidden glass-panel">
-            <img
-              alt="Industrial Map Interface"
-              className="w-full h-full object-contain opacity-50 mix-blend-screen grayscale contrast-125"
-              src={mapSrc}
-              onError={handleImgError}
-              loading="lazy"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-40" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#060e20_100%)] opacity-30" />
-          </div>
+      {/* ── Main Canvas ── */}
+      {activeNav === 'users' ? (
+        <main className="fixed inset-0 w-full h-full overflow-hidden pl-16 pt-0">
+          <UserManagement />
+        </main>
+      ) : (
+        <main className="fixed inset-0 w-full h-full overflow-hidden pl-16">
+          <div className="relative w-full h-full bg-[#060e20]">
+            <div className="absolute inset-0 z-0 overflow-hidden glass-panel">
+              <img
+                alt="Industrial Map Interface"
+                className="w-full h-full object-contain opacity-50 mix-blend-screen grayscale contrast-125"
+                src={mapSrc}
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-40" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#060e20_100%)] opacity-30" />
+            </div>
 
-          {/* Left toolset */}
-          <div className="absolute top-margin z-20 flex flex-col gap-4 left-4">
-            <div className="glass-panel bg-surface-container-low/40 p-stack-sm rounded-xl border border-outline-variant/30 flex flex-col gap-2 w-14 items-center">
-              <button
-                type="button"
-                className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-secondary-container/20 text-on-surface transition-all"
-                aria-label="Zoom in"
-              >
-                <span className="material-symbols-outlined">zoom_in</span>
-              </button>
-              <button
-                type="button"
-                className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-secondary-container/20 text-on-surface transition-all"
-                aria-label="Zoom out"
-              >
-                <span className="material-symbols-outlined">zoom_out</span>
-              </button>
-              <div className="w-8 h-px bg-outline-variant/30 mx-auto my-1" />
-              <button
-                type="button"
-                className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-secondary-container/20 text-on-surface transition-all"
-                aria-label="Layers"
-              >
-                <span className="material-symbols-outlined">layers</span>
-              </button>
+            <div className="absolute top-margin z-20 flex flex-col gap-4 left-4">
+              <div className="glass-panel bg-surface-container-low/40 p-stack-sm rounded-xl border border-outline-variant/30 flex flex-col gap-2 w-14 items-center">
+                <button
+                  type="button"
+                  className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-secondary-container/20 text-on-surface transition-all"
+                  aria-label="Zoom in"
+                >
+                  <span className="material-symbols-outlined">zoom_in</span>
+                </button>
+                <button
+                  type="button"
+                  className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-secondary-container/20 text-on-surface transition-all"
+                  aria-label="Zoom out"
+                >
+                  <span className="material-symbols-outlined">zoom_out</span>
+                </button>
+                <div className="w-8 h-px bg-outline-variant/30 mx-auto my-1" />
+                <button
+                  type="button"
+                  className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-secondary-container/20 text-on-surface transition-all"
+                  aria-label="Layers"
+                >
+                  <span className="material-symbols-outlined">layers</span>
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      </main>
+        </main>
+      )}
     </div>
   );
 }
