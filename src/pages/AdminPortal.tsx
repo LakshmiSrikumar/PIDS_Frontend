@@ -40,7 +40,7 @@ export default function AdminPortal() {
         setSubmitStatus('idle');
         return;
       }
-      setAuth(res.token, res.role);
+      setAuth(res.token, res.role, username);
       // ── ROUTING FIX ────────────────────────────────────────
       // Removed the 1-second setTimeout wrapper. The setTimeout
       // was a UX flourish to show "ACCESS GRANTED" before

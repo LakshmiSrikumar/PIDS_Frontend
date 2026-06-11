@@ -151,13 +151,18 @@ export default function UserManagement() {
     if (!editUserId) return;
     const first = editFirstName.trim();
     const last = editLastName.trim();
+    const mob = editMobile.trim();
     if (!first || !last) {
       showToast('Names cannot be empty', 'error');
       return;
     }
+    if (mob && !/^\d{10}$/.test(mob)) {
+      showToast('Mobile number must be 10 digits', 'error');
+      return;
+    }
     const payload: UpdateUserRequest = {
       full_name: `${first} ${last}`,
-      mobile: editMobile.trim() || null,
+      mobile: mob || null,
     };
     try {
       await updateUser(editUserId, payload);
@@ -180,7 +185,7 @@ export default function UserManagement() {
     if (!deleteUserId) return;
     try {
       await deleteUser(deleteUserId);
-      showToast('User deactivated successfully.', 'error');
+      showToast('User deactivated successfully.', 'success');
       setDeleteModalOpen(false);
       setDeleteUserId(null);
       await fetchUsers();

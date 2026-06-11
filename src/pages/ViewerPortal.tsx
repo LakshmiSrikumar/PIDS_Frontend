@@ -29,16 +29,11 @@ export default function ViewerPortal() {
 
     try {
       const res = await viewerLogin(cisfId, username, password, fullName);
-      setAuth(res.token, res.role);
+      setAuth(res.token, res.role, username);
       setSubmitStatus('granted');
-      const next = res.must_change_password ? '/change-password' : '/dashboard/viewer';
-      // ── ROUTING FIX ────────────────────────────────────────
-      // Removed the 1-second setTimeout wrapper. Navigate
-      // immediately after setAuth with replace: true so the
-      // ProtectedRoute sees the committed token/role on its
-      // first render of the new route.
-      // ──────────────────────────────────────────────────────
-      navigate(next, { replace: true });
+      // Viewers always go to dashboard — admin sets their password,
+      // so forced password rotation is not needed for this role.
+      navigate('/dashboard/viewer', { replace: true });
     } catch (err: any) {
       setSubmitStatus('idle');
       setErrorMsg(err.response?.data?.detail ?? 'Login failed. Try again.');

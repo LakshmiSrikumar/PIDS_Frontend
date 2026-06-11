@@ -4,6 +4,7 @@ import LandingPage from './pages/LandingPage';
 import AdminPortal from './pages/AdminPortal';
 import ViewerPortal from './pages/ViewerPortal';
 import Admin_Dashboard from './pages/Admin_Dashboard';
+import Viewer_Dashboard from './pages/Viewer_Dashboard';
 
 import InitializeAdmin from './pages/InitializeAdmin';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -23,6 +24,14 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={['admin']}>
                 <Admin_Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/viewer"
+            element={
+              <ProtectedRoute allowedRoles={['admin', 'viewer']}>
+                <Viewer_Dashboard />
               </ProtectedRoute>
             }
           />

@@ -74,7 +74,7 @@ export default function InitializeAdmin() {
       const res = await initializeAdmin(username, newPassword, confirmPassword);
       // Backend issued a session token — store it and drop the
       // operator straight into the admin portal. No second login.
-      setAuth(res.token, res.role);
+      setAuth(res.token, res.role, username);
       // ── ROUTING FIX ────────────────────────────────────────
       // Removed the 600ms setTimeout wrapper. Navigate
       // immediately after setAuth with replace: true so the
