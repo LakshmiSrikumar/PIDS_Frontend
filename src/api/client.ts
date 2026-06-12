@@ -26,6 +26,7 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401 && !skip) {
       localStorage.removeItem("token");
       localStorage.removeItem("role");
+      localStorage.removeItem("username");
       window.location.href = "/login";
     }
     return Promise.reject(error);

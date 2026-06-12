@@ -1,6 +1,8 @@
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { logoutUser } from '../api/auth';
 import { useAuth } from '../context/AuthContext';
+import LogoutReasonModal from '../components/LogoutReasonModal';
 import mapImage from '../assets/map.jpg';
 
 const ALERTS = [
@@ -11,20 +13,80 @@ const ALERTS = [
   { time: '14:15:30', type: 'Action', label: 'Action', message: 'Manual Zoom Activated', node: 'LOBBY_PTZ_02' },
 ];
 
+type PendingSource = 'logout' | 'app-close';
+
 export default function Viewer_Dashboard() {
   const navigate = useNavigate();
   const { clearAuth, userName, role } = useAuth();
+  const [showModal, setShowModal] = useState(false);
+  const pendingSource = useRef<PendingSource | null>(null);
 
   const displayName = userName ?? (role === 'admin' ? 'Admin' : 'Viewer');
 
-  const handleLogout = async () => {
+  // ── Tauri window close interception ──
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+
+    (async () => {
+      try {
+        const { getCurrentWindow } = await import('@tauri-apps/api/window');
+        const appWindow = getCurrentWindow();
+        const unlistenFn = await appWindow.onCloseRequested(async (event) => {
+          event.preventDefault();
+          pendingSource.current = 'app-close';
+          setShowModal(true);
+        });
+        unlisten = unlistenFn;
+      } catch {
+        // not running inside Tauri — safe to ignore
+      }
+    })();
+
+    return () => {
+      unlisten?.();
+    };
+  }, []);
+
+  // ── Browser tab close / refresh guard ──
+  useEffect(() => {
+    if (!showModal) {
+      const handler = (e: BeforeUnloadEvent) => {
+        e.preventDefault();
+        e.returnValue = '';
+      };
+      window.addEventListener('beforeunload', handler);
+      return () => window.removeEventListener('beforeunload', handler);
+    }
+  }, [showModal]);
+
+  const handleLogoutClick = () => {
+    pendingSource.current = 'logout';
+    setShowModal(true);
+  };
+
+  const handleReasonSubmit = async (reason: string) => {
+    const source = pendingSource.current;
+    pendingSource.current = null;
+    setShowModal(false);
+
     try {
-      await logoutUser(undefined);
+      await logoutUser(reason);
     } catch {
       // swallow — still clear local session
     }
     clearAuth();
-    navigate('/');
+
+    if (source === 'app-close') {
+      try {
+        const { getCurrentWindow } = await import('@tauri-apps/api/window');
+        getCurrentWindow().close();
+      } catch {
+        // not Tauri — fall through to navigation
+        navigate('/', { replace: true });
+      }
+    } else {
+      navigate('/', { replace: true });
+    }
   };
 
   return (
@@ -41,7 +103,7 @@ export default function Viewer_Dashboard() {
             <p className="text-label-md font-label-md text-on-surface font-bold">{displayName}</p>
           </div>
           <button
-            onClick={handleLogout}
+            onClick={handleLogoutClick}
             className="flex items-center gap-2 px-3 py-1 text-on-surface-variant hover:text-secondary hover:bg-secondary/10 rounded-lg transition-all duration-200 active:scale-95 border border-outline-variant/20 cursor-pointer"
           >
             <span className="material-symbols-outlined text-[20px]">logout</span>
@@ -60,11 +122,9 @@ export default function Viewer_Dashboard() {
               className="w-full h-full object-contain opacity-80 mix-blend-screen"
               src={mapImage}
             />
-            {/* FOV Overlays */}
             <div className="absolute top-[20%] left-[40%] w-48 h-48 bg-secondary/20 rounded-full blur-3xl fov-pulse pointer-events-none" />
             <div className="absolute top-[60%] left-[70%] w-64 h-64 bg-primary/10 rounded-full blur-3xl fov-pulse pointer-events-none" />
             <div className="absolute bottom-[10%] left-[15%] w-40 h-40 bg-secondary/15 rounded-full blur-3xl fov-pulse pointer-events-none" />
-            {/* Interactive Nodes */}
             <div className="absolute top-[25%] left-[42%] group cursor-pointer">
               <div className="w-4 h-4 bg-secondary rounded-full shadow-[0_0_12px_rgba(76,215,246,0.8)] animate-pulse" />
               <div className="absolute hidden group-hover:block bottom-full left-1/2 -translate-x-1/2 mb-2 p-2 bg-surface-container-high border border-outline-variant rounded shadow-xl min-w-[120px] z-50">
@@ -78,7 +138,6 @@ export default function Viewer_Dashboard() {
             <div className="absolute bottom-[20%] left-[20%] group cursor-pointer">
               <div className="w-4 h-4 bg-secondary rounded-full shadow-[0_0_12px_rgba(76,215,246,0.8)] animate-pulse" />
             </div>
-            {/* Map Controls */}
             <div className="absolute bottom-6 right-6 flex flex-col gap-2">
               <button className="w-10 h-10 bg-surface-container-highest/80 backdrop-blur-md rounded-lg flex items-center justify-center border border-outline-variant/30 hover:bg-surface-bright transition-colors cursor-pointer">
                 <span className="material-symbols-outlined text-on-surface">add</span>
@@ -118,7 +177,7 @@ export default function Viewer_Dashboard() {
                 }`}
               >
                 <div className="flex justify-between mb-1">
-                  <span className={`text-label-sm font-label-sm ${alert.type === 'Alert' ? 'text-on-surface-variant' : alert.type === 'Action' ? 'text-secondary' : 'text-on-surface-variant'}`}>
+                  <span className={`text-label-sm font-label-sm ${alert.type === 'Alert' ? 'text-on-surface-variant' : 'text-on-surface-variant'}`}>
                     {alert.time}
                   </span>
                   <span className={`text-label-sm font-label-sm uppercase ${
@@ -155,6 +214,9 @@ export default function Viewer_Dashboard() {
           <div className="absolute top-0 right-1 w-2 h-2 bg-error rounded-full" />
         </a>
       </nav>
+
+      {/* ── Logout Reason Modal ── */}
+      {showModal && <LogoutReasonModal onSubmit={handleReasonSubmit} />}
     </div>
   );
 }

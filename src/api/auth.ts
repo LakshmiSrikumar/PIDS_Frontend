@@ -33,6 +33,7 @@ export const logoutUser = async (reason?: string) => {
   await apiClient.post('/auth/logout', { reason: reason ?? null });
   localStorage.removeItem('token');
   localStorage.removeItem('role');
+  localStorage.removeItem('username');
 };
 
 export const changePassword = async (oldPassword: string, newPassword: string) => {

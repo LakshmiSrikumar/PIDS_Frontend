@@ -30,6 +30,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (uName) {
       localStorage.setItem('username', uName);
       setUserName(uName);
+      } else {
+            localStorage.removeItem('username');
+            setUserName(null);
     }
   };
 

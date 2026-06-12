@@ -151,10 +151,10 @@ body {
 }
 
 .fov-pulse {
-  animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation: fov-pulse-animation 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-@keyframes pulse {
+@keyframes fov-pulse-animation {
   0%, 100% { opacity: 0.15; }
   50% { opacity: 0.35; }
 }
