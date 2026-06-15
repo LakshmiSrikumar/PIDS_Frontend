@@ -49,7 +49,7 @@ export default function Viewer_Dashboard() {
 
   // ── Browser tab close / refresh guard ──
   useEffect(() => {
-    if (!showModal) {
+    if (showModal) {
       const handler = (e: BeforeUnloadEvent) => {
         e.preventDefault();
         e.returnValue = '';

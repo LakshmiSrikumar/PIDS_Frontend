@@ -4,6 +4,7 @@ import { logoutUser } from '../api/auth';
 import { useAuth } from '../context/AuthContext';
 import mapImage from '../assets/map.jpg';
 import UserManagement from './UserManagement';
+import DeviceManagement from './DeviceManagement';
 
 const MAP_PRIMARY = mapImage;
 // const STITCH_MAP_FALLBACK =
@@ -106,6 +107,10 @@ export default function Admin_Dashboard() {
       {activeNav === 'users' ? (
         <main className="fixed inset-0 w-full h-full overflow-hidden pl-16 pt-0">
           <UserManagement />
+        </main>
+      ) : activeNav === 'devices' ? (
+        <main className="fixed inset-0 w-full h-full overflow-hidden pl-16 pt-0">
+          <DeviceManagement />
         </main>
       ) : (
         <main className="fixed inset-0 w-full h-full overflow-hidden pl-16">
